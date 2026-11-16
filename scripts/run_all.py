@@ -367,7 +367,7 @@ def sensitivity_section(reps_quick):
 
 
 # ------------------------------------------------------------------ 6. forecast
-def forecast_section(model, mods, trade, keep):
+def forecast_section(model, mods, trade, keep, n_fc_reps=10):
     fp = FP_MAIN
     tr = fl.TRUTHS["B_design"]
     cutin = 140
@@ -408,6 +408,18 @@ def forecast_section(model, mods, trade, keep):
            "share_of_next_year_returns_from_units_built_before_cutin_pct": r(100 * (1 - (f_no.sum() - f_ca.sum()) / f_no.sum())),
            "weld_returns_to_date": int(obs.is_weld.sum()),
            "returns_last_6_full_periods": [int(v) for v in hist[-7:-1]]}
+    # how good is the blind forecast in general? ten more populations of the same truth, no action
+    errs = []
+    for sd in range(3000, 3000 + n_fc_reps):
+        p2 = fl.generate(tr, model, fp, seed=sd)
+        o2 = fl.observe(p2, T_OBS)
+        f2 = an.forecast(o2, an.production_week_test(o2, n_sim=199, seed=sd), fp.units_per_week, n_per)
+        k2 = ((p2["t_return"] - T_OBS) // 28.0).astype(int)
+        act = int(np.sum(p2["weld_first"] & p2["will_return"] & (k2 >= 0) & (k2 < n_per)))
+        errs.append(100 * (f2.sum() / act - 1))
+    out["forecast_error_replicates_pct"] = {"n": n_fc_reps, "median": r(np.median(errs)),
+                                            "min": r(np.min(errs)), "max": r(np.max(errs)),
+                                            "mean_abs": r(np.mean(np.abs(errs)))}
     fg.fig_forecast(hist, f_no, f_ca, a_no, a_ca, T_OBS, os.path.join(RES, "fig9_forecast.png"))
     return out
 
@@ -436,7 +448,7 @@ def main():
     print(f"[{time.time() - t0:5.0f} s] trade study")
     summary["sensitivity"] = sensitivity_section(3 if args.quick else 8)
     print(f"[{time.time() - t0:5.0f} s] sensitivity")
-    summary["forecast"] = forecast_section(model, mods, summary["trade"], keep)
+    summary["forecast"] = forecast_section(model, mods, summary["trade"], keep, 3 if args.quick else 10)
     fg.fig_ishikawa(os.path.join(RES, "ishikawa.png"))
     name = "summary_quick.json" if args.quick else "summary.json"
     with open(os.path.join(RES, name), "w", encoding="utf-8", newline="\n") as f:

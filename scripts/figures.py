@@ -185,11 +185,11 @@ def fig_forecast(hist, f_no, f_ca, a_no, a_ca, t_obs, path):
 
 
 def fig_ishikawa(path):
-    """Cause-and-effect diagram for the 8D report. Status marks follow docs/8D_REPORT.md."""
+    """Cause-and-effect diagram for the 8D report."""
     cats = {
         "Material": ["contact alloy lot (AgSnO2 share) [A: cause]", "contact rivet hardness", "spring material"],
         "Machine / process": ["contact force and over-travel setting [A: cause]", "relay adjustment drift",
-                              "solder flux on contacts [excluded]"],
+                              "contamination of the contacts"],
         "Design": ["relay inrush rating vs LED load [B: cause]", "random closing angle [B: contributes]",
                    "no inrush limiting in the channel", "bounce time of the relay type"],
         "Load / environment": ["LED watts per channel [B: cause]", "lamp driver bulk capacitance",
@@ -214,9 +214,9 @@ def fig_ishikawa(path):
         for k, it in enumerate(items):
             f = (k + 1) / (len(items) + 1)
             xa, ya = x0 + 1.6 * f, y_end + (4 - y_end) * f
-            colr = "#b03a2e" if "cause]" in it else ("#7b7d7d" if "excluded" in it else "k")
+            colr = "#b03a2e" if "cause]" in it else "k"
             ax.plot([xa - 0.25, xa], [ya, ya], color=colr, lw=0.8)
             ax.text(xa - 0.3, ya, it, fontsize=7.5, ha="right", va="center", color=colr)
-    ax.text(0.3, 0.05, "Red: confirmed as cause in truth A (weak lot) or truth B (design limit) of this simulated study. "
-            "Grey: excluded. Black: possible contributor, not separated.", fontsize=7.5)
+    ax.text(0.3, 0.05, "Red: the cause built into truth A (weak lot) or truth B (design limit) of this simulated study and "
+            "found by the blind analysis. Black: possible contributors, not examined.", fontsize=7.5)
     _save(fig, path)
