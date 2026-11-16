@@ -1,0 +1,38 @@
+name: ci
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Tests
+        run: python -m pytest -q
+      - name: Regenerate results (quick replicate counts) and check them
+        run: |
+          python -m scripts.run_all --quick
+          python - <<'PY'
+          import json
+          d = json.load(open("results/summary_quick.json"))
+          assert d["inrush"]["ipeak_max_abs_err_pct"] < 8 and d["inrush"]["i2t_max_abs_err_pct"] < 12
+          for name, t in d["truths"].items():
+              assert t["check"]["verdict_correct"], name
+          assert d["trade"]["decision"] is not None
+          z = d["zero_cross"]["reduction_factor_best_target"]
+          assert z[0] > z[5] > z[-1] >= 0.95
+          print("checks passed; decision:", d["trade"]["decision"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: |
+            results/summary_quick.json
+            results/*.png
