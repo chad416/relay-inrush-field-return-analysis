@@ -64,7 +64,7 @@ value the switch standard assigns to a 16 A switch. On a share of installations
 the LED load is two to eight times that. Each switch-on charges the lamps' bulk
 capacitors through a contact that bounces for about a millisecond. The charge
 that flows while the contact is open goes through an arc. Its energy (0.5 J per
-operation at 200 W, several joules at 800 W and above) melts the contact
+operation at 200 W, about 2 J at 800 W) melts the contact
 surface, and on a fraction of operations the weld is stronger than the opening
 force of the relay. In the model that fraction is 1.0e-7 per operation at
 200 W, 6.7e-6 at 400 W and 1.4e-4 at 800 W of high-inrush lamps: 0.02 %, 1.5 %
@@ -91,8 +91,8 @@ Evidence:
 
 Still to do on hardware before D4 is closed: section and analyse the contacts
 of ten returns (weld nugget, alloy, contact force of the surviving channels of
-the same unit); reproduce the weld on new relays on the 800 W lamp-test
-circuit. The model predicts a weld within about 7 000 operations at random
+the same unit); reproduce the weld on new relays on an 800 W lamp-load
+circuit (the standard's lamp model scaled up). The model predicts a weld within about 7 000 operations at random
 closing angle there; if new relays survive 40 000, the root cause above is wrong.
 
 ## D5 Corrective action chosen and verified
