@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+results/cache/
+results/summary_quick.json
+results/run_log.txt
